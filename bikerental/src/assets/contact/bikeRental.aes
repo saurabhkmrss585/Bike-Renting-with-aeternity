@@ -1,0 +1,36 @@
+@compiler >= 6
+include "String.aes"
+contract BikeRentalService =
+ 
+  record rental = {
+    ownerName : string,
+    renter : string,
+    amount : int,
+    days : int,
+    isPaid : bool}
+
+  type state = map(address, rental)
+
+  entrypoint init() : state = {}
+
+  stateful entrypoint rentBike(ownerName : string, renter : string, amount : int, days : int) =
+    let rental = { ownerName = ownerName
+        , renter = renter
+        , amount= amount
+        , days  = days
+        , isPaid= false}
+    put(state{ [rental] = rental })
+
+  entrypoint getRental() : rental =
+    switch(Map.lookup(Call.caller, state))
+      None => abort("No rental found")
+      Some(rental) => rental
+
+  payable stateful entrypoint payRent(ownerAddress : address, name : string) =
+    let rental = getRental()
+    require(rental.ownerName == name, "Property not found for the specified name")
+    require(!rental.isPaid, "Rent is already paid")
+    require(Contract.balance >= rental.amount, "Not enough money to pay this rent: ")
+    Chain.spend(ownerAddress, rental.amount)
+    let updatedRental = rental{ renter = Call.caller, isPaid = true }
+    put(state{ [Call.caller] = updatedRental })
