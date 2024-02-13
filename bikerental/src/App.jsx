@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './BikeRentalSystem.css'; // Import CSS file
-
+import Connect from './assets/Connect'
 function App() {
   const [bikeOwner, setBikeOwner] = useState('');
   const [bikeRenter, setBikeRenter] = useState('');
@@ -63,6 +63,7 @@ function App() {
         <p>Bike Renter: {bikeRenter}</p>
         <p>Total Amount: {total}</p>
       </div>
+      <Connect />
     </div>
   );
 }
